@@ -1,0 +1,13 @@
+# Biner hasil build
+bin/
+
+# Environment lokal
+.env
+
+# macOS
+.DS_Store
+
+# Editor/IDE
+.idea/
+.vscode/
+*.swp
