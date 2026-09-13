@@ -12,14 +12,17 @@ type employeeRepo struct {
 	db *gorm.DB
 }
 
+// NewEmployeeRepository membuat implementasi EmployeeRepository berbasis GORM.
 func NewEmployeeRepository(db *gorm.DB) EmployeeRepository {
 	return &employeeRepo{db: db}
 }
 
+// Create menyimpan karyawan beserta tunjangannya.
 func (r *employeeRepo) Create(ctx context.Context, e *model.Employee) error {
 	return r.db.WithContext(ctx).Create(e).Error
 }
 
+// FindByID mencari karyawan berdasarkan ID (termasuk tunjangan).
 func (r *employeeRepo) FindByID(ctx context.Context, id uint) (*model.Employee, error) {
 	var e model.Employee
 	if err := r.db.WithContext(ctx).Preload("Allowances").First(&e, id).Error; err != nil {
@@ -28,6 +31,7 @@ func (r *employeeRepo) FindByID(ctx context.Context, id uint) (*model.Employee, 
 	return &e, nil
 }
 
+// FindByNIK mencari karyawan berdasarkan NIK (termasuk tunjangan).
 func (r *employeeRepo) FindByNIK(ctx context.Context, nik string) (*model.Employee, error) {
 	var e model.Employee
 	if err := r.db.WithContext(ctx).Preload("Allowances").Where("nik = ?", nik).First(&e).Error; err != nil {
@@ -36,6 +40,7 @@ func (r *employeeRepo) FindByNIK(ctx context.Context, nik string) (*model.Employ
 	return &e, nil
 }
 
+// List menampilkan karyawan dengan paginasi dan filter status.
 func (r *employeeRepo) List(ctx context.Context, page, limit int, status string) ([]model.Employee, int64, error) {
 	var employees []model.Employee
 	q := r.db.WithContext(ctx).Model(&model.Employee{})
@@ -53,12 +58,14 @@ func (r *employeeRepo) List(ctx context.Context, page, limit int, status string)
 	return employees, total, nil
 }
 
+// ListActive menampilkan seluruh karyawan berstatus aktif.
 func (r *employeeRepo) ListActive(ctx context.Context) ([]model.Employee, error) {
 	var employees []model.Employee
 	err := r.db.WithContext(ctx).Preload("Allowances").Where("status = ?", "active").Find(&employees).Error
 	return employees, err
 }
 
+// Update menyimpan perubahan data karyawan tanpa menyentuh tunjangan.
 func (r *employeeRepo) Update(ctx context.Context, e *model.Employee) error {
 	return r.db.WithContext(ctx).Omit("Allowances").Save(e).Error
 }
@@ -88,6 +95,7 @@ func (r *employeeRepo) UpdateWithAllowances(ctx context.Context, e *model.Employ
 	})
 }
 
+// Delete menghapus karyawan berdasarkan ID.
 func (r *employeeRepo) Delete(ctx context.Context, id uint) error {
 	res := r.db.WithContext(ctx).Delete(&model.Employee{}, id)
 	if res.Error != nil {

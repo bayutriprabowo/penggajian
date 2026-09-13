@@ -11,10 +11,12 @@ type OvertimeHandler struct {
 	overtimes service.OvertimeService
 }
 
+// NewOvertimeHandler membuat handler untuk data lembur.
 func NewOvertimeHandler(overtimes service.OvertimeService) *OvertimeHandler {
 	return &OvertimeHandler{overtimes: overtimes}
 }
 
+// Create mencatat lembur baru (upah dihitung otomatis sesuai PP 35/2021).
 func (h *OvertimeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req dto.OvertimeRequest
 	if err := decodeJSON(w, r, &req); err != nil {
@@ -29,6 +31,7 @@ func (h *OvertimeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	writeCreated(w, "lembur berhasil dicatat", o)
 }
 
+// ListByEmployee menampilkan riwayat lembur karyawan (bisa difilter per periode).
 func (h *OvertimeHandler) ListByEmployee(w http.ResponseWriter, r *http.Request) {
 	id, err := pathID(r)
 	if err != nil {

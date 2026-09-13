@@ -264,6 +264,7 @@ func SeedDemo(
 	return nil
 }
 
+// demoUserList merangkum username karyawan demo untuk log.
 func demoUserList() string {
 	out := ""
 	for i, d := range demoEmployees {
@@ -275,6 +276,7 @@ func demoUserList() string {
 	return out
 }
 
+// boolPtr mengembalikan pointer ke bool (helper request DTO).
 func boolPtr(v bool) *bool {
 	return &v
 }

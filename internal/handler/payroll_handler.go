@@ -12,10 +12,12 @@ type PayrollHandler struct {
 	payroll service.PayrollService
 }
 
+// NewPayrollHandler membuat handler untuk payroll.
 func NewPayrollHandler(payroll service.PayrollService) *PayrollHandler {
 	return &PayrollHandler{payroll: payroll}
 }
 
+// Run men-generate payroll untuk periode tertentu.
 func (h *PayrollHandler) Run(w http.ResponseWriter, r *http.Request) {
 	var req dto.PayrollRunRequest
 	if err := decodeJSON(w, r, &req); err != nil {
@@ -30,6 +32,7 @@ func (h *PayrollHandler) Run(w http.ResponseWriter, r *http.Request) {
 	writeCreated(w, "payroll berhasil di-generate", list)
 }
 
+// GetByID menampilkan satu slip gaji.
 func (h *PayrollHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id, err := pathID(r)
 	if err != nil {
@@ -45,6 +48,7 @@ func (h *PayrollHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	writeOK(w, "slip gaji", p)
 }
 
+// ListByEmployee menampilkan riwayat slip gaji karyawan.
 func (h *PayrollHandler) ListByEmployee(w http.ResponseWriter, r *http.Request) {
 	id, err := pathID(r)
 	if err != nil {
@@ -60,6 +64,7 @@ func (h *PayrollHandler) ListByEmployee(w http.ResponseWriter, r *http.Request) 
 	writeOK(w, "riwayat slip gaji", list)
 }
 
+// ListByPeriod menampilkan semua slip gaji pada satu periode.
 func (h *PayrollHandler) ListByPeriod(w http.ResponseWriter, r *http.Request) {
 	period := r.URL.Query().Get("period")
 	page := queryInt(r, "page", 1)
@@ -73,6 +78,7 @@ func (h *PayrollHandler) ListByPeriod(w http.ResponseWriter, r *http.Request) {
 	writeOK(w, "daftar payroll periode "+period, list)
 }
 
+// Approve mengubah status payroll draft menjadi approved.
 func (h *PayrollHandler) Approve(w http.ResponseWriter, r *http.Request) {
 	id, err := pathID(r)
 	if err != nil {
@@ -86,6 +92,7 @@ func (h *PayrollHandler) Approve(w http.ResponseWriter, r *http.Request) {
 	writeOK(w, "payroll disetujui", nil)
 }
 
+// MarkPaid mengubah status payroll approved menjadi paid.
 func (h *PayrollHandler) MarkPaid(w http.ResponseWriter, r *http.Request) {
 	id, err := pathID(r)
 	if err != nil {
@@ -99,6 +106,7 @@ func (h *PayrollHandler) MarkPaid(w http.ResponseWriter, r *http.Request) {
 	writeOK(w, "payroll ditandai lunas", nil)
 }
 
+// CalculateTHR menghitung THR karyawan (penuh/proporsional + pajaknya).
 func (h *PayrollHandler) CalculateTHR(w http.ResponseWriter, r *http.Request) {
 	req := dto.THRCalculateRequest{
 		EmployeeID: queryUint(r, "employee_id", 0),

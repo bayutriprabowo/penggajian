@@ -17,10 +17,12 @@ type overtimeService struct {
 	employees repository.EmployeeRepository
 }
 
+// NewOvertimeService membuat implementasi OvertimeService.
 func NewOvertimeService(overtimes repository.OvertimeRepository, employees repository.EmployeeRepository) OvertimeService {
 	return &overtimeService{overtimes: overtimes, employees: employees}
 }
 
+// Create memvalidasi lembur lalu menghitung upahnya sesuai PP 35/2021.
 func (s *overtimeService) Create(ctx context.Context, req dto.OvertimeRequest) (*dto.OvertimeDTO, error) {
 	if req.EmployeeID == 0 || req.Hours <= 0 || req.Date == "" {
 		return nil, ErrBadRequest
@@ -66,6 +68,7 @@ func (s *overtimeService) Create(ctx context.Context, req dto.OvertimeRequest) (
 	}, nil
 }
 
+// ListByEmployee menampilkan riwayat lembur (opsional filter periode).
 func (s *overtimeService) ListByEmployee(ctx context.Context, employeeID uint, period string) ([]dto.OvertimeDTO, error) {
 	from, to := "", ""
 	if period != "" {

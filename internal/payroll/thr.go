@@ -15,6 +15,8 @@ type THRResult struct {
 	Amount          float64
 }
 
+// CalculateTHR menghitung THR sesuai Permenaker 6/2016:
+// masa kerja >= 12 bulan mendapat 1x gaji, di bawahnya proporsional (bulan/12).
 func CalculateTHR(baseSalary, fixedAllowance float64, joinDate, periodDate time.Time) THRResult {
 	months := fullMonthsBetween(joinDate, periodDate)
 	monthly := baseSalary + fixedAllowance
@@ -28,6 +30,7 @@ func CalculateTHR(baseSalary, fixedAllowance float64, joinDate, periodDate time.
 	}
 }
 
+// fullMonthsBetween menghitung jumlah bulan penuh antara dua tanggal.
 func fullMonthsBetween(from, to time.Time) int {
 	months := (to.Year()-from.Year())*12 + int(to.Month()-from.Month())
 	if to.Day() < from.Day() {

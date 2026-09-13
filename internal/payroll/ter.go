@@ -61,6 +61,7 @@ var terTableC = []TERBracket{
 	{185.60, -1, 34.00},
 }
 
+// TERTables mengembalikan seluruh tabel TER per kategori.
 func TERTables() map[string][]TERBracket {
 	return map[string][]TERBracket{
 		TERCategoryA: terTableA,
@@ -84,6 +85,7 @@ func TERCategory(ptkpStatus string) (string, error) {
 	}
 }
 
+// terRate mencari tarif TER yang berlaku untuk bruto bulanan pada kategori tertentu.
 func terRate(category string, monthlyGross float64) float64 {
 	table := TERTables()[category]
 	grossMillions := monthlyGross / 1_000_000

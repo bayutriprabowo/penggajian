@@ -23,6 +23,7 @@ type payrollService struct {
 	cfg       *config.Config
 }
 
+// NewPayrollService membuat implementasi PayrollService.
 func NewPayrollService(
 	payrolls repository.PayrollRepository,
 	employees repository.EmployeeRepository,
@@ -32,6 +33,7 @@ func NewPayrollService(
 	return &payrollService{payrolls: payrolls, employees: employees, overtimes: overtimes, cfg: cfg}
 }
 
+// rates mengubah konfigurasi env menjadi tarif BPJS.
 func (s *payrollService) rates() payroll.BPJSRates {
 	return payroll.BPJSRates{
 		HealthCap:      s.cfg.BPJSHealthCap,
@@ -46,6 +48,7 @@ func (s *payrollService) rates() payroll.BPJSRates {
 	}
 }
 
+// Run men-generate slip gaji untuk satu karyawan atau semua karyawan aktif.
 func (s *payrollService) Run(ctx context.Context, req dto.PayrollRunRequest) ([]dto.PayrollDTO, error) {
 	if _, err := time.Parse("2006-01", req.Period); err != nil {
 		return nil, ErrBadRequest
@@ -120,6 +123,7 @@ func (s *payrollService) Run(ctx context.Context, req dto.PayrollRunRequest) ([]
 	return result, nil
 }
 
+// buildPayslip mengumpulkan data gaji, lembur, dan THR lalu menghitung slip.
 func (s *payrollService) buildPayslip(ctx context.Context, emp *model.Employee, period string, bonus, thrOverride float64) (*payroll.Payslip, error) {
 	var fixed, nonFixed float64
 	for _, a := range emp.Allowances {
@@ -163,6 +167,7 @@ func (s *payrollService) buildPayslip(ctx context.Context, emp *model.Employee, 
 	return payroll.ComputePayslip(input)
 }
 
+// GetByID mengambil slip gaji; role employee hanya boleh slip miliknya.
 func (s *payrollService) GetByID(ctx context.Context, id uint, requester *model.User) (*dto.PayrollDTO, error) {
 	p, err := s.payrolls.FindByID(ctx, id)
 	if err != nil {
@@ -178,6 +183,7 @@ func (s *payrollService) GetByID(ctx context.Context, id uint, requester *model.
 	return toPayrollDTO(p, nil), nil
 }
 
+// ListByEmployee menampilkan riwayat slip; role employee hanya miliknya.
 func (s *payrollService) ListByEmployee(ctx context.Context, employeeID uint, requester *model.User) ([]dto.PayrollDTO, error) {
 	if requester.Role != nil && requester.Role.Name == "employee" &&
 		(requester.EmployeeID == nil || *requester.EmployeeID != employeeID) {
@@ -194,6 +200,7 @@ func (s *payrollService) ListByEmployee(ctx context.Context, employeeID uint, re
 	return out, nil
 }
 
+// ListByPeriod menampilkan slip satu periode (khusus admin/hr/finance).
 func (s *payrollService) ListByPeriod(ctx context.Context, period string, page, limit int, requester *model.User) (*dto.PayrollListDTO, error) {
 	if requester.Role != nil && requester.Role.Name == "employee" {
 		return nil, ErrForbidden
@@ -218,6 +225,7 @@ func (s *payrollService) ListByPeriod(ctx context.Context, period string, page, 
 	return res, nil
 }
 
+// Approve mengubah status draft menjadi approved.
 func (s *payrollService) Approve(ctx context.Context, id uint) error {
 	p, err := s.payrolls.FindByID(ctx, id)
 	if err != nil {
@@ -229,6 +237,7 @@ func (s *payrollService) Approve(ctx context.Context, id uint) error {
 	return s.payrolls.UpdateStatus(ctx, id, model.PayrollApproved)
 }
 
+// MarkPaid mengubah status approved menjadi paid.
 func (s *payrollService) MarkPaid(ctx context.Context, id uint) error {
 	p, err := s.payrolls.FindByID(ctx, id)
 	if err != nil {
@@ -240,6 +249,7 @@ func (s *payrollService) MarkPaid(ctx context.Context, id uint) error {
 	return s.payrolls.UpdateStatus(ctx, id, model.PayrollPaid)
 }
 
+// CalculateTHR menghitung THR penuh/proporsional beserta PPh 21-nya.
 func (s *payrollService) CalculateTHR(ctx context.Context, req dto.THRCalculateRequest) (*dto.THRResponse, error) {
 	if req.EmployeeID == 0 || req.Period == "" {
 		return nil, ErrBadRequest
@@ -282,6 +292,7 @@ func (s *payrollService) CalculateTHR(ctx context.Context, req dto.THRCalculateR
 	}, nil
 }
 
+// toPayrollDTO mengubah model payroll menjadi DTO lengkap dengan detail.
 func toPayrollDTO(p *model.Payroll, emp *model.Employee) *dto.PayrollDTO {
 	res := &dto.PayrollDTO{
 		ID:                   p.ID,
@@ -318,6 +329,7 @@ func toPayrollDTO(p *model.Payroll, emp *model.Employee) *dto.PayrollDTO {
 	return res
 }
 
+// lastDayOfMonth mengembalikan tanggal terakhir bulan dari periode YYYY-MM.
 func lastDayOfMonth(period string) string {
 	t, err := time.Parse("2006-01", period)
 	if err != nil {
@@ -326,6 +338,7 @@ func lastDayOfMonth(period string) string {
 	return t.AddDate(0, 1, -1).Format("2006-01-02")
 }
 
+// periodEndDate mengembalikan time.Time akhir bulan dari periode YYYY-MM.
 func periodEndDate(period string) time.Time {
 	t, err := time.Parse("2006-01", period)
 	if err != nil {

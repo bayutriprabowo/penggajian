@@ -18,12 +18,14 @@ type employeeService struct {
 	employees repository.EmployeeRepository
 }
 
+// NewEmployeeService membuat implementasi EmployeeService.
 func NewEmployeeService(employees repository.EmployeeRepository) EmployeeService {
 	return &employeeService{employees: employees}
 }
 
 var validPTKP = map[string]bool{"TK0": true, "TK1": true, "TK2": true, "TK3": true, "K0": true, "K1": true, "K2": true, "K3": true}
 
+// Create memvalidasi dan menambah karyawan baru.
 func (s *employeeService) Create(ctx context.Context, req dto.EmployeeRequest) (*dto.EmployeeDTO, error) {
 	if req.NIK == "" || req.FullName == "" || req.BaseSalary <= 0 {
 		return nil, ErrBadRequest
@@ -77,6 +79,7 @@ func (s *employeeService) Create(ctx context.Context, req dto.EmployeeRequest) (
 	return toEmployeeDTO(emp), nil
 }
 
+// GetByID mengambil detail satu karyawan.
 func (s *employeeService) GetByID(ctx context.Context, id uint) (*dto.EmployeeDTO, error) {
 	emp, err := s.employees.FindByID(ctx, id)
 	if err != nil {
@@ -88,6 +91,7 @@ func (s *employeeService) GetByID(ctx context.Context, id uint) (*dto.EmployeeDT
 	return toEmployeeDTO(emp), nil
 }
 
+// List menampilkan karyawan dengan paginasi dan filter status.
 func (s *employeeService) List(ctx context.Context, page, limit int, status string) (*dto.EmployeeListDTO, error) {
 	if page < 1 {
 		page = 1
@@ -106,6 +110,7 @@ func (s *employeeService) List(ctx context.Context, page, limit int, status stri
 	return res, nil
 }
 
+// Update mengubah data karyawan (field kosong tidak diubah).
 func (s *employeeService) Update(ctx context.Context, id uint, req dto.EmployeeRequest) (*dto.EmployeeDTO, error) {
 	if err := validateEmployeeRequest(req); err != nil {
 		return nil, err
@@ -190,6 +195,7 @@ func (s *employeeService) Update(ctx context.Context, id uint, req dto.EmployeeR
 	return toEmployeeDTO(updated), nil
 }
 
+// Delete menghapus karyawan; ditolak bila masih punya payroll/lembur.
 func (s *employeeService) Delete(ctx context.Context, id uint) error {
 	if err := s.employees.Delete(ctx, id); err != nil {
 		if dberr.IsForeignKeyViolation(err) {
@@ -200,6 +206,7 @@ func (s *employeeService) Delete(ctx context.Context, id uint) error {
 	return nil
 }
 
+// toAllowanceModels mengubah DTO tunjangan menjadi model.
 func toAllowanceModels(items []dto.AllowanceDTO) []model.Allowance {
 	out := make([]model.Allowance, 0, len(items))
 	for _, it := range items {
@@ -212,6 +219,7 @@ func toAllowanceModels(items []dto.AllowanceDTO) []model.Allowance {
 	return out
 }
 
+// toEmployeeDTO mengubah model karyawan menjadi DTO.
 func toEmployeeDTO(e *model.Employee) *dto.EmployeeDTO {
 	res := &dto.EmployeeDTO{
 		ID:         e.ID,
@@ -238,6 +246,7 @@ func toEmployeeDTO(e *model.Employee) *dto.EmployeeDTO {
 	return res
 }
 
+// defaultString mengembalikan fallback bila string kosong.
 func defaultString(v, fallback string) string {
 	if v == "" {
 		return fallback
@@ -245,6 +254,7 @@ func defaultString(v, fallback string) string {
 	return v
 }
 
+// validateEmployeeRequest memvalidasi email, kelas risiko JKK, status, dan tunjangan.
 func validateEmployeeRequest(req dto.EmployeeRequest) error {
 	if req.Email != "" && !strings.Contains(req.Email, "@") {
 		return ErrBadRequest

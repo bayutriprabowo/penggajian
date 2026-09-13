@@ -20,6 +20,9 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+// main adalah entrypoint aplikasi: memuat konfigurasi, menghubungkan
+// database, menjalankan migrasi dan seeder, lalu menjalankan HTTP server
+// dengan graceful shutdown.
 func main() {
 	cfg := config.Load()
 	if cfg.JWTSecret == "change-me-in-production" {
@@ -110,6 +113,7 @@ func main() {
 	log.Println("server berhenti")
 }
 
+// newRepos membuat seluruh implementasi repository dengan satu koneksi DB.
 func newRepos(db *gorm.DB) *repository.Repos {
 	return &repository.Repos{
 		Users:     repository.NewUserRepository(db),
@@ -120,6 +124,7 @@ func newRepos(db *gorm.DB) *repository.Repos {
 	}
 }
 
+// newServices menyusun seluruh service dengan dependensi repository dan konfigurasi.
 func newServices(repos *repository.Repos, cfg *config.Config) *service.Services {
 	auth := service.NewAuthService(repos.Users, repos.Roles, cfg.JWTSecret, cfg.JWTExpireHours)
 	return &service.Services{

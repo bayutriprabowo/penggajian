@@ -14,20 +14,24 @@ import (
 
 const maxBodyBytes = 1 << 20
 
+// writeJSON menulis respons JSON dengan status code tertentu.
 func writeJSON(w http.ResponseWriter, status int, resp dto.Response) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	_ = json.NewEncoder(w).Encode(resp)
 }
 
+// writeOK menulis respons sukses dengan status 200.
 func writeOK(w http.ResponseWriter, message string, data any) {
 	writeJSON(w, http.StatusOK, dto.Success(message, data))
 }
 
+// writeCreated menulis respons sukses dengan status 201.
 func writeCreated(w http.ResponseWriter, message string, data any) {
 	writeJSON(w, http.StatusCreated, dto.Success(message, data))
 }
 
+// writeError memetakan error service ke status HTTP yang sesuai.
 func writeError(w http.ResponseWriter, err error) {
 	switch {
 	case errors.Is(err, service.ErrBadRequest):
@@ -46,6 +50,7 @@ func writeError(w http.ResponseWriter, err error) {
 	}
 }
 
+// decodeJSON membaca dan memvalidasi body JSON request (maks 1 MB, tanpa field tak dikenal).
 func decodeJSON(w http.ResponseWriter, r *http.Request, dst any) error {
 	r.Body = http.MaxBytesReader(w, r.Body, maxBodyBytes)
 	dec := json.NewDecoder(r.Body)
@@ -60,6 +65,7 @@ func decodeJSON(w http.ResponseWriter, r *http.Request, dst any) error {
 	return nil
 }
 
+// pathID mengambil path parameter "id" sebagai uint.
 func pathID(r *http.Request) (uint, error) {
 	id, err := strconv.ParseUint(r.PathValue("id"), 10, 64)
 	if err != nil || id == 0 {
@@ -68,6 +74,7 @@ func pathID(r *http.Request) (uint, error) {
 	return uint(id), nil
 }
 
+// queryUint membaca query parameter uint dengan nilai default.
 func queryUint(r *http.Request, key string, def uint) uint {
 	v := r.URL.Query().Get(key)
 	if v == "" {
@@ -80,6 +87,7 @@ func queryUint(r *http.Request, key string, def uint) uint {
 	return uint(n)
 }
 
+// queryInt membaca query parameter integer dengan nilai default.
 func queryInt(r *http.Request, key string, def int) int {
 	v := r.URL.Query().Get(key)
 	if v == "" {
@@ -92,6 +100,7 @@ func queryInt(r *http.Request, key string, def int) int {
 	return n
 }
 
+// queryFloat membaca query parameter float dengan nilai default.
 func queryFloat(r *http.Request, key string, def float64) float64 {
 	v := r.URL.Query().Get(key)
 	if v == "" {

@@ -40,6 +40,7 @@ type Payslip struct {
 	Details              []DetailItem `json:"details"`
 }
 
+// ComputePayslip menghitung seluruh komponen slip gaji bulanan:
 func ComputePayslip(in EmployeePayrollInput) (*Payslip, error) {
 	// Basis upah BPJS = gaji pokok + tunjangan tetap (PP 46/2015)
 	bpjs := CalculateBPJS(in.Rates, in.BaseSalary+in.FixedAllowance, in.BPJSHealth, in.BPJSTK)

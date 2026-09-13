@@ -21,6 +21,7 @@ type Handlers struct {
 	Health   *handler.HealthHandler
 }
 
+// New menyusun seluruh route API dengan middleware auth/RBAC.
 func New(
 	h *Handlers,
 	auth service.AuthService,
@@ -69,6 +70,7 @@ func New(
 	return recoverer(logging(mux))
 }
 
+// recoverer menangkap panic handler agar server tidak berhenti.
 func recoverer(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
@@ -83,6 +85,7 @@ func recoverer(next http.Handler) http.Handler {
 	})
 }
 
+// logging mencatat method, path, dan durasi setiap request.
 func logging(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()

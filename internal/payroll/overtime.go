@@ -7,6 +7,7 @@ import "math"
 
 const OvertimeDivisor = 173
 
+// hourlyRate menghitung upah sejam = 1/173 x (gaji pokok + tunjangan tetap).
 func hourlyRate(baseSalary, fixedAllowance float64) float64 {
 	return (baseSalary + fixedAllowance) / OvertimeDivisor
 }

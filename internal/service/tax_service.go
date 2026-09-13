@@ -15,10 +15,12 @@ type taxService struct {
 	employees repository.EmployeeRepository
 }
 
+// NewTaxService membuat implementasi TaxService.
 func NewTaxService(payrolls repository.PayrollRepository, employees repository.EmployeeRepository) TaxService {
 	return &taxService{payrolls: payrolls, employees: employees}
 }
 
+// TERTables mengembalikan tabel TER A/B/C untuk ditampilkan ke API.
 func (s *taxService) TERTables() []dto.TERTableDTO {
 	tables := payroll.TERTables()
 	out := make([]dto.TERTableDTO, 0, 3)
@@ -32,6 +34,7 @@ func (s *taxService) TERTables() []dto.TERTableDTO {
 	return out
 }
 
+// TERInfo menyimulasikan PPh 21 TER bulanan.
 func (s *taxService) TERInfo(ptkpStatus string, monthlyGross float64) (*dto.TERInfoDTO, error) {
 	category, rate, err := payroll.MonthlyPPh21Rate(ptkpStatus, monthlyGross)
 	if err != nil {
@@ -50,6 +53,7 @@ func (s *taxService) TERInfo(ptkpStatus string, monthlyGross float64) (*dto.TERI
 	}, nil
 }
 
+// AnnualRecap menghitung rekap PPh 21 tahunan dan selisihnya dengan potongan TER.
 func (s *taxService) AnnualRecap(ctx context.Context, req dto.AnnualRecapRequest) (*dto.AnnualRecapDTO, error) {
 	if req.Year < 2000 || req.Year > 2100 {
 		return nil, ErrBadRequest

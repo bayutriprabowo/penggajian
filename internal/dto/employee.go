@@ -14,10 +14,12 @@ type Pagination struct {
 	Total int `json:"total"`
 }
 
+// Success membangun envelope respons sukses.
 func Success(message string, data any) Response {
 	return Response{Status: "success", Message: message, Data: data}
 }
 
+// Error membangun envelope respons gagal.
 func Error(message string) Response {
 	return Response{Status: "error", Message: message}
 }

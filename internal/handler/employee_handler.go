@@ -11,10 +11,12 @@ type EmployeeHandler struct {
 	employees service.EmployeeService
 }
 
+// NewEmployeeHandler membuat handler untuk data karyawan.
 func NewEmployeeHandler(employees service.EmployeeService) *EmployeeHandler {
 	return &EmployeeHandler{employees: employees}
 }
 
+// Create menambah karyawan baru.
 func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var req dto.EmployeeRequest
 	if err := decodeJSON(w, r, &req); err != nil {
@@ -29,6 +31,7 @@ func (h *EmployeeHandler) Create(w http.ResponseWriter, r *http.Request) {
 	writeCreated(w, "karyawan berhasil ditambahkan", emp)
 }
 
+// GetByID menampilkan detail satu karyawan.
 func (h *EmployeeHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	id, err := pathID(r)
 	if err != nil {
@@ -43,6 +46,7 @@ func (h *EmployeeHandler) GetByID(w http.ResponseWriter, r *http.Request) {
 	writeOK(w, "detail karyawan", emp)
 }
 
+// List menampilkan daftar karyawan dengan paginasi dan filter status.
 func (h *EmployeeHandler) List(w http.ResponseWriter, r *http.Request) {
 	page := queryInt(r, "page", 1)
 	limit := queryInt(r, "limit", 10)
@@ -55,6 +59,7 @@ func (h *EmployeeHandler) List(w http.ResponseWriter, r *http.Request) {
 	writeOK(w, "daftar karyawan", list)
 }
 
+// Update mengubah data karyawan.
 func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request) {
 	id, err := pathID(r)
 	if err != nil {
@@ -74,6 +79,7 @@ func (h *EmployeeHandler) Update(w http.ResponseWriter, r *http.Request) {
 	writeOK(w, "karyawan berhasil diperbarui", emp)
 }
 
+// Delete menghapus karyawan (ditolak bila masih punya payroll/lembur).
 func (h *EmployeeHandler) Delete(w http.ResponseWriter, r *http.Request) {
 	id, err := pathID(r)
 	if err != nil {

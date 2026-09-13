@@ -13,10 +13,12 @@ type HealthHandler struct {
 	db *sql.DB
 }
 
+// NewHealthHandler membuat handler health check.
 func NewHealthHandler(db *sql.DB) *HealthHandler {
 	return &HealthHandler{db: db}
 }
 
+// Check memeriksa status server dan koneksi database.
 func (h *HealthHandler) Check(w http.ResponseWriter, r *http.Request) {
 	ctx, cancel := context.WithTimeout(r.Context(), 2*time.Second)
 	defer cancel()

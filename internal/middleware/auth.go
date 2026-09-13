@@ -34,6 +34,8 @@ func OptionalAuth(auth service.AuthService, users repository.UserRepository, rol
 	return authMiddleware(auth, users, roles, true)
 }
 
+// authMiddleware memvalidasi Bearer token lalu memuat user + permission ke context.
+// Bila optional = true, request tanpa token tetap dilanjutkan sebagai anonim.
 func authMiddleware(auth service.AuthService, users repository.UserRepository, roles repository.RoleRepository, optional bool) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -142,6 +144,7 @@ func UserFromContext(ctx context.Context) *model.User {
 	return user
 }
 
+// writeError menulis respons error JSON untuk middleware.
 func writeError(w http.ResponseWriter, status int, message string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)

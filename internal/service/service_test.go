@@ -19,6 +19,7 @@ type fakeUserRepo struct {
 	users map[string]*model.User
 }
 
+// Create (fake) menyimpan user atau menolak username duplikat.
 func (f *fakeUserRepo) Create(_ context.Context, u *model.User) error {
 	if _, ok := f.users[u.Username]; ok {
 		return errors.New("duplicate")
@@ -26,6 +27,8 @@ func (f *fakeUserRepo) Create(_ context.Context, u *model.User) error {
 	f.users[u.Username] = u
 	return nil
 }
+
+// FindByID (fake) mencari user berdasarkan ID.
 func (f *fakeUserRepo) FindByID(_ context.Context, id uint) (*model.User, error) {
 	for _, u := range f.users {
 		if u.ID == id {
@@ -34,12 +37,16 @@ func (f *fakeUserRepo) FindByID(_ context.Context, id uint) (*model.User, error)
 	}
 	return nil, gorm.ErrRecordNotFound
 }
+
+// FindByUsername (fake) mencari user berdasarkan username.
 func (f *fakeUserRepo) FindByUsername(_ context.Context, username string) (*model.User, error) {
 	if u, ok := f.users[username]; ok {
 		return u, nil
 	}
 	return nil, gorm.ErrRecordNotFound
 }
+
+// FindByEmail (fake) mencari user berdasarkan email.
 func (f *fakeUserRepo) FindByEmail(_ context.Context, email string) (*model.User, error) {
 	for _, u := range f.users {
 		if u.Email == email {
@@ -48,8 +55,14 @@ func (f *fakeUserRepo) FindByEmail(_ context.Context, email string) (*model.User
 	}
 	return nil, gorm.ErrRecordNotFound
 }
+
+// WithRole (fake) tidak melakukan apa-apa.
 func (f *fakeUserRepo) WithRole(_ context.Context, u *model.User) error { return nil }
-func (f *fakeUserRepo) Update(_ context.Context, u *model.User) error   { return nil }
+
+// Update (fake) tidak melakukan apa-apa.
+func (f *fakeUserRepo) Update(_ context.Context, u *model.User) error { return nil }
+
+// List (fake) mengembalikan daftar kosong.
 func (f *fakeUserRepo) List(_ context.Context, _, _ int) ([]model.User, int64, error) {
 	return nil, 0, nil
 }
@@ -59,16 +72,21 @@ type fakeRoleRepo struct {
 	perms []string
 }
 
+// CreateRole (fake) menyimpan role ke map.
 func (f *fakeRoleRepo) CreateRole(_ context.Context, r *model.Role) error {
 	f.roles[r.Name] = r
 	return nil
 }
+
+// FindRoleByName (fake) mencari role dari map.
 func (f *fakeRoleRepo) FindRoleByName(_ context.Context, name string) (*model.Role, error) {
 	if r, ok := f.roles[name]; ok {
 		return r, nil
 	}
 	return nil, gorm.ErrRecordNotFound
 }
+
+// FindPermissionsByName (fake) membuat permission dari nama.
 func (f *fakeRoleRepo) FindPermissionsByName(_ context.Context, names []string) ([]model.Permission, error) {
 	var out []model.Permission
 	for _, n := range names {
@@ -76,18 +94,26 @@ func (f *fakeRoleRepo) FindPermissionsByName(_ context.Context, names []string) 
 	}
 	return out, nil
 }
+
+// CreatePermissions (fake) mencatat nama permission.
 func (f *fakeRoleRepo) CreatePermissions(_ context.Context, perms []model.Permission) error {
 	for _, p := range perms {
 		f.perms = append(f.perms, p.Name)
 	}
 	return nil
 }
+
+// AssignPermissions (fake) tidak melakukan apa-apa.
 func (f *fakeRoleRepo) AssignPermissions(_ context.Context, _ uint, _ []model.Permission) error {
 	return nil
 }
+
+// RoleWithPermissions (fake) tidak digunakan dalam test.
 func (f *fakeRoleRepo) RoleWithPermissions(_ context.Context, roleID uint) (*model.Role, error) {
 	return nil, nil
 }
+
+// PermissionsByRole (fake) mengembalikan daftar permission tercatat.
 func (f *fakeRoleRepo) PermissionsByRole(_ context.Context, _ uint) ([]string, error) {
 	return f.perms, nil
 }
@@ -97,21 +123,28 @@ type fakeEmployeeRepo struct {
 	nextID    uint
 }
 
+// newFakeEmployeeRepo membuat repo karyawan dalam memori.
 func newFakeEmployeeRepo() *fakeEmployeeRepo {
 	return &fakeEmployeeRepo{employees: map[uint]*model.Employee{}, nextID: 1}
 }
+
+// Create (fake) menyimpan karyawan dan memberi ID berurutan.
 func (f *fakeEmployeeRepo) Create(_ context.Context, e *model.Employee) error {
 	e.ID = f.nextID
 	f.nextID++
 	f.employees[e.ID] = e
 	return nil
 }
+
+// FindByID (fake) mencari karyawan berdasarkan ID.
 func (f *fakeEmployeeRepo) FindByID(_ context.Context, id uint) (*model.Employee, error) {
 	if e, ok := f.employees[id]; ok {
 		return e, nil
 	}
 	return nil, gorm.ErrRecordNotFound
 }
+
+// FindByNIK (fake) mencari karyawan berdasarkan NIK.
 func (f *fakeEmployeeRepo) FindByNIK(_ context.Context, nik string) (*model.Employee, error) {
 	for _, e := range f.employees {
 		if e.NIK == nik {
@@ -120,6 +153,8 @@ func (f *fakeEmployeeRepo) FindByNIK(_ context.Context, nik string) (*model.Empl
 	}
 	return nil, gorm.ErrRecordNotFound
 }
+
+// List (fake) mengembalikan seluruh karyawan.
 func (f *fakeEmployeeRepo) List(_ context.Context, _, _ int, _ string) ([]model.Employee, int64, error) {
 	var out []model.Employee
 	for _, e := range f.employees {
@@ -127,10 +162,14 @@ func (f *fakeEmployeeRepo) List(_ context.Context, _, _ int, _ string) ([]model.
 	}
 	return out, int64(len(out)), nil
 }
+
+// Update (fake) menimpa data karyawan di map.
 func (f *fakeEmployeeRepo) Update(_ context.Context, e *model.Employee) error {
 	f.employees[e.ID] = e
 	return nil
 }
+
+// UpdateWithAllowances (fake) menyimpan karyawan dan tunjangan baru.
 func (f *fakeEmployeeRepo) UpdateWithAllowances(_ context.Context, e *model.Employee, allowances *[]model.Allowance) error {
 	f.employees[e.ID] = e
 	if allowances != nil {
@@ -138,10 +177,14 @@ func (f *fakeEmployeeRepo) UpdateWithAllowances(_ context.Context, e *model.Empl
 	}
 	return nil
 }
+
+// Delete (fake) menghapus karyawan dari map.
 func (f *fakeEmployeeRepo) Delete(_ context.Context, id uint) error {
 	delete(f.employees, id)
 	return nil
 }
+
+// ListActive (fake) mengembalikan karyawan berstatus aktif.
 func (f *fakeEmployeeRepo) ListActive(_ context.Context) ([]model.Employee, error) {
 	var out []model.Employee
 	for _, e := range f.employees {
@@ -156,10 +199,13 @@ type fakeOvertimeRepo struct {
 	overtimes []model.Overtime
 }
 
+// Create (fake) menambah catatan lembur ke slice.
 func (f *fakeOvertimeRepo) Create(_ context.Context, o *model.Overtime) error {
 	f.overtimes = append(f.overtimes, *o)
 	return nil
 }
+
+// SumByEmployeePeriod (fake) menjumlahkan upah lembur karyawan.
 func (f *fakeOvertimeRepo) SumByEmployeePeriod(_ context.Context, employeeID uint, from, to string) (float64, error) {
 	var sum float64
 	for _, o := range f.overtimes {
@@ -169,6 +215,8 @@ func (f *fakeOvertimeRepo) SumByEmployeePeriod(_ context.Context, employeeID uin
 	}
 	return sum, nil
 }
+
+// ListByEmployee (fake) memfilter lembur milik karyawan.
 func (f *fakeOvertimeRepo) ListByEmployee(_ context.Context, employeeID uint, from, to string) ([]model.Overtime, error) {
 	var out []model.Overtime
 	for _, o := range f.overtimes {
@@ -184,21 +232,28 @@ type fakePayrollRepo struct {
 	nextID   uint
 }
 
+// newFakePayrollRepo membuat repo payroll dalam memori.
 func newFakePayrollRepo() *fakePayrollRepo {
 	return &fakePayrollRepo{payrolls: map[uint]*model.Payroll{}, nextID: 1}
 }
+
+// Create (fake) menyimpan slip gaji dan memberi ID berurutan.
 func (f *fakePayrollRepo) Create(_ context.Context, p *model.Payroll) error {
 	p.ID = f.nextID
 	f.nextID++
 	f.payrolls[p.ID] = p
 	return nil
 }
+
+// FindByID (fake) mencari slip gaji berdasarkan ID.
 func (f *fakePayrollRepo) FindByID(_ context.Context, id uint) (*model.Payroll, error) {
 	if p, ok := f.payrolls[id]; ok {
 		return p, nil
 	}
 	return nil, gorm.ErrRecordNotFound
 }
+
+// FindByEmployeePeriod (fake) mencari slip per karyawan dan periode.
 func (f *fakePayrollRepo) FindByEmployeePeriod(_ context.Context, employeeID uint, period string) (*model.Payroll, error) {
 	for _, p := range f.payrolls {
 		if p.EmployeeID == employeeID && p.Period == period {
@@ -207,6 +262,8 @@ func (f *fakePayrollRepo) FindByEmployeePeriod(_ context.Context, employeeID uin
 	}
 	return nil, gorm.ErrRecordNotFound
 }
+
+// ListByEmployee (fake) mengembalikan slip milik karyawan.
 func (f *fakePayrollRepo) ListByEmployee(_ context.Context, employeeID uint) ([]model.Payroll, error) {
 	var out []model.Payroll
 	for _, p := range f.payrolls {
@@ -216,6 +273,8 @@ func (f *fakePayrollRepo) ListByEmployee(_ context.Context, employeeID uint) ([]
 	}
 	return out, nil
 }
+
+// ListByPeriod (fake) mengembalikan slip satu periode.
 func (f *fakePayrollRepo) ListByPeriod(_ context.Context, period string, page, limit int) ([]model.Payroll, int64, error) {
 	var out []model.Payroll
 	for _, p := range f.payrolls {
@@ -225,6 +284,8 @@ func (f *fakePayrollRepo) ListByPeriod(_ context.Context, period string, page, l
 	}
 	return out, int64(len(out)), nil
 }
+
+// UpdateStatus (fake) mengubah status slip gaji.
 func (f *fakePayrollRepo) UpdateStatus(_ context.Context, id uint, status string) error {
 	if p, ok := f.payrolls[id]; ok {
 		p.Status = status
@@ -232,6 +293,8 @@ func (f *fakePayrollRepo) UpdateStatus(_ context.Context, id uint, status string
 	}
 	return errors.New("not found")
 }
+
+// SumPPh21ByEmployeeYear (fake) menjumlahkan PPh 21 karyawan.
 func (f *fakePayrollRepo) SumPPh21ByEmployeeYear(_ context.Context, employeeID uint, year int) (float64, error) {
 	var sum float64
 	for _, p := range f.payrolls {
@@ -250,6 +313,7 @@ var _ repository.PayrollRepository = (*fakePayrollRepo)(nil)
 
 // ---------- helpers ----------
 
+// testRoles menyediakan role dasar untuk test.
 func testRoles() *fakeRoleRepo {
 	employee := &model.Role{ID: 4, Name: "employee"}
 	hr := &model.Role{ID: 2, Name: "hr"}
@@ -258,6 +322,7 @@ func testRoles() *fakeRoleRepo {
 	return &fakeRoleRepo{roles: map[string]*model.Role{"employee": employee, "hr": hr, "finance": finance, "admin": admin}}
 }
 
+// testCfg menyediakan konfigurasi lengkap untuk test.
 func testCfg() *config.Config {
 	return &config.Config{
 		JWTSecret:        "secret-tes",
@@ -274,6 +339,7 @@ func testCfg() *config.Config {
 	}
 }
 
+// testEmployee menyediakan karyawan contoh untuk test.
 func testEmployee() *model.Employee {
 	join, _ := time.Parse("2006-01-02", "2025-10-15")
 	return &model.Employee{
@@ -288,6 +354,7 @@ func testEmployee() *model.Employee {
 
 // ---------- tests ----------
 
+// TestAuthRegisterAndLogin menguji validasi, konflik, dan login.
 func TestAuthRegisterAndLogin(t *testing.T) {
 	ctx := context.Background()
 	auth := NewAuthService(&fakeUserRepo{users: map[string]*model.User{}}, testRoles(), "secret-tes", 1)
@@ -325,6 +392,7 @@ func TestAuthRegisterAndLogin(t *testing.T) {
 	}
 }
 
+// TestEmployeeUpdateKeepsBaseSalary memastikan gaji pokok tidak berubah saat update parsial.
 func TestEmployeeUpdateKeepsBaseSalary(t *testing.T) {
 	ctx := context.Background()
 	empRepo := newFakeEmployeeRepo()
@@ -350,6 +418,7 @@ func TestEmployeeUpdateKeepsBaseSalary(t *testing.T) {
 	}
 }
 
+// TestPayrollRunDuplicateConflict memastikan payroll duplikat ditolak.
 func TestPayrollRunDuplicateConflict(t *testing.T) {
 	ctx := context.Background()
 	empRepo := newFakeEmployeeRepo()
@@ -366,6 +435,7 @@ func TestPayrollRunDuplicateConflict(t *testing.T) {
 	}
 }
 
+// TestPayrollTHRConsistency memastikan masa kerja dan nominal THR.
 func TestPayrollTHRConsistency(t *testing.T) {
 	ctx := context.Background()
 	empRepo := newFakeEmployeeRepo()
@@ -386,6 +456,7 @@ func TestPayrollTHRConsistency(t *testing.T) {
 	}
 }
 
+// TestPayrollRunEmptyEmployees memastikan error bila tidak ada karyawan aktif.
 func TestPayrollRunEmptyEmployees(t *testing.T) {
 	ctx := context.Background()
 	svc := NewPayrollService(newFakePayrollRepo(), newFakeEmployeeRepo(), &fakeOvertimeRepo{}, testCfg())
@@ -395,6 +466,7 @@ func TestPayrollRunEmptyEmployees(t *testing.T) {
 	}
 }
 
+// TestSeedDemoIdempotent memastikan seeder demo tidak membuat data ganda.
 func TestSeedDemoIdempotent(t *testing.T) {
 	ctx := context.Background()
 	roles := testRoles()

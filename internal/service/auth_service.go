@@ -21,10 +21,12 @@ type authService struct {
 	jwtExpHours int
 }
 
+// NewAuthService membuat implementasi AuthService.
 func NewAuthService(users repository.UserRepository, roles repository.RoleRepository, jwtSecret string, jwtExpHours int) AuthService {
 	return &authService{users: users, roles: roles, jwtSecret: jwtSecret, jwtExpHours: jwtExpHours}
 }
 
+// Register membuat user baru dengan password bcrypt dan role tertentu.
 func (s *authService) Register(ctx context.Context, req dto.RegisterRequest) (*dto.UserDTO, error) {
 	if req.Username == "" || req.Email == "" || req.Password == "" {
 		return nil, ErrBadRequest
@@ -79,6 +81,7 @@ func (s *authService) Register(ctx context.Context, req dto.RegisterRequest) (*d
 	return toUserDTO(user), nil
 }
 
+// Login memverifikasi kredensial dan menerbitkan token JWT.
 func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (*dto.AuthResponse, error) {
 	if req.Username == "" || req.Password == "" {
 		return nil, ErrBadRequest
@@ -97,6 +100,7 @@ func (s *authService) Login(ctx context.Context, req dto.LoginRequest) (*dto.Aut
 	return &dto.AuthResponse{Token: token, User: *toUserDTO(user)}, nil
 }
 
+// ListUsers menampilkan daftar user dengan paginasi.
 func (s *authService) ListUsers(ctx context.Context, page, limit int) (*dto.UserListDTO, error) {
 	if page < 1 {
 		page = 1
@@ -115,6 +119,7 @@ func (s *authService) ListUsers(ctx context.Context, page, limit int) (*dto.User
 	return res, nil
 }
 
+// GenerateToken membuat JWT berisi identitas user.
 func (s *authService) GenerateToken(user *model.User) (string, error) {
 	roleName := ""
 	if user.Role != nil {
@@ -133,6 +138,7 @@ func (s *authService) GenerateToken(user *model.User) (string, error) {
 	return token.SignedString([]byte(s.jwtSecret))
 }
 
+// ParseToken memvalidasi tanda tangan dan struktur token JWT.
 func (s *authService) ParseToken(tokenString string) (*jwt.Token, error) {
 	return jwt.ParseWithClaims(tokenString, &TokenClaims{}, func(t *jwt.Token) (any, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
@@ -142,6 +148,7 @@ func (s *authService) ParseToken(tokenString string) (*jwt.Token, error) {
 	})
 }
 
+// toUserDTO mengubah model user menjadi DTO (tanpa field sensitif).
 func toUserDTO(u *model.User) *dto.UserDTO {
 	res := &dto.UserDTO{
 		ID:         u.ID,

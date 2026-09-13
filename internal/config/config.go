@@ -25,6 +25,7 @@ type Config struct {
 	DemoUserPass     string
 }
 
+// Load membaca seluruh konfigurasi aplikasi dari environment variable.
 func Load() *Config {
 	return &Config{
 		Port:             getEnv("PORT", "8080"),
@@ -47,6 +48,7 @@ func Load() *Config {
 	}
 }
 
+// getEnv membaca env string dengan nilai fallback.
 func getEnv(key, fallback string) string {
 	if v := os.Getenv(key); v != "" {
 		return v
@@ -54,6 +56,7 @@ func getEnv(key, fallback string) string {
 	return fallback
 }
 
+// getEnvInt membaca env integer dengan nilai fallback.
 func getEnvInt(key string, fallback int) int {
 	if v := os.Getenv(key); v != "" {
 		if n, err := strconv.Atoi(v); err == nil {
@@ -63,6 +66,7 @@ func getEnvInt(key string, fallback int) int {
 	return fallback
 }
 
+// getEnvFloat membaca env float dengan nilai fallback.
 func getEnvFloat(key string, fallback float64) float64 {
 	if v := os.Getenv(key); v != "" {
 		if n, err := strconv.ParseFloat(v, 64); err == nil {
@@ -72,6 +76,7 @@ func getEnvFloat(key string, fallback float64) float64 {
 	return fallback
 }
 
+// getEnvBool membaca env boolean dengan nilai fallback.
 func getEnvBool(key string, fallback bool) bool {
 	if v := os.Getenv(key); v != "" {
 		if b, err := strconv.ParseBool(v); err == nil {

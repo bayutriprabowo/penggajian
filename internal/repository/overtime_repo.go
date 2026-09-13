@@ -11,14 +11,17 @@ type overtimeRepo struct {
 	db *gorm.DB
 }
 
+// NewOvertimeRepository membuat implementasi OvertimeRepository berbasis GORM.
 func NewOvertimeRepository(db *gorm.DB) OvertimeRepository {
 	return &overtimeRepo{db: db}
 }
 
+// Create menyimpan catatan lembur.
 func (r *overtimeRepo) Create(ctx context.Context, o *model.Overtime) error {
 	return r.db.WithContext(ctx).Create(o).Error
 }
 
+// SumByEmployeePeriod menjumlahkan upah lembur karyawan pada rentang tanggal.
 func (r *overtimeRepo) SumByEmployeePeriod(ctx context.Context, employeeID uint, from, to string) (float64, error) {
 	var sum float64
 	err := r.db.WithContext(ctx).Model(&model.Overtime{}).
@@ -27,6 +30,7 @@ func (r *overtimeRepo) SumByEmployeePeriod(ctx context.Context, employeeID uint,
 	return sum, err
 }
 
+// ListByEmployee menampilkan riwayat lembur karyawan (opsional filter rentang tanggal).
 func (r *overtimeRepo) ListByEmployee(ctx context.Context, employeeID uint, from, to string) ([]model.Overtime, error) {
 	var list []model.Overtime
 	q := r.db.WithContext(ctx).Where("employee_id = ?", employeeID)

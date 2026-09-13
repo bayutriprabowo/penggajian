@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// TestMonthlyPPh21TER memastikan tarif TER A dan C untuk bruto 10 juta.
 func TestMonthlyPPh21TER(t *testing.T) {
 	// TK0, gaji 10 juta -> kategori A, bracket 9.65-10.05 = 2%
 	tax, err := MonthlyPPh21("TK0", 10_000_000)
@@ -24,6 +25,7 @@ func TestMonthlyPPh21TER(t *testing.T) {
 	}
 }
 
+// TestOvertime memverifikasi rumus lembur hari kerja.
 func TestOvertime(t *testing.T) {
 	// gaji 10jt, lembur 2 jam hari kerja: 1.5x + 2x dari (10jt/173), dibulatkan ke bawah
 	r := 10_000_000.0 / 173
@@ -33,6 +35,7 @@ func TestOvertime(t *testing.T) {
 	}
 }
 
+// TestBPJS memverifikasi iuran BPJS Kesehatan dan JHT/JP.
 func TestBPJS(t *testing.T) {
 	r := BPJSRates{
 		HealthCap: 12_000_000, HealthWorker: 0.01, HealthEmployer: 0.04,
@@ -45,6 +48,7 @@ func TestBPJS(t *testing.T) {
 	}
 }
 
+// TestTHR memverifikasi THR penuh dan proporsional.
 func TestTHR(t *testing.T) {
 	join, _ := time.Parse("2006-01-02", "2025-03-01")
 	period, _ := time.Parse("2006-01", "2026-03")
@@ -61,6 +65,7 @@ func TestTHR(t *testing.T) {
 	}
 }
 
+// TestAnnual memverifikasi PPh 21 tahunan untuk PKP 57,6 juta.
 func TestAnnual(t *testing.T) {
 	res := AnnualPPh21(120_000_000, 3_600_000, "TK0")
 	// neto = 120jt - 6jt (jabatan max) - 2.4jt... 3.6jt pension > cap 2.4jt
@@ -70,6 +75,7 @@ func TestAnnual(t *testing.T) {
 	}
 }
 
+// TestTERCategory memverifikasi pemetaan status PTKP ke kategori TER.
 func TestTERCategory(t *testing.T) {
 	cases := map[string]string{
 		"TK0": "A", "TK1": "A", "K0": "A",
@@ -90,6 +96,7 @@ func TestTERCategory(t *testing.T) {
 	}
 }
 
+// TestPTKPAmount memverifikasi nilai PTKP seluruh status.
 func TestPTKPAmount(t *testing.T) {
 	cases := map[string]float64{
 		"TK0": 54_000_000,
@@ -108,6 +115,7 @@ func TestPTKPAmount(t *testing.T) {
 	}
 }
 
+// TestAnnualBrackets memverifikasi tarif progresif Pasal 17.
 func TestAnnualBrackets(t *testing.T) {
 	// TK0, neto bersih 200jt -> PKP 146jt: 5%x60jt + 15%x86jt = 3jt + 12.9jt = 15.9jt
 	res := AnnualPPh21(260_000_000, 0, "TK0")
@@ -118,6 +126,7 @@ func TestAnnualBrackets(t *testing.T) {
 	}
 }
 
+// TestTHRUnder12MonthsEdge memverifikasi masa kerja 11 bulan penuh.
 func TestTHRUnder12MonthsEdge(t *testing.T) {
 	join, _ := time.Parse("2006-01-02", "2025-03-01")
 	period, _ := time.Parse("2006-01-02", "2026-02-28")
@@ -131,6 +140,7 @@ func TestTHRUnder12MonthsEdge(t *testing.T) {
 	}
 }
 
+// TestOvertimeHoliday memverifikasi lembur hari libur dan batas 10 jam.
 func TestOvertimeHoliday(t *testing.T) {
 	r := 10_000_000.0 / 173
 	// 10 jam hari libur: 7x2 + 1x3 + 2x4 = 25x rate
@@ -144,6 +154,7 @@ func TestOvertimeHoliday(t *testing.T) {
 	}
 }
 
+// TestComputePayslip memverifikasi slip lengkap: bruto, potongan, PPh 21, net.
 func TestComputePayslip(t *testing.T) {
 	in := EmployeePayrollInput{
 		BaseSalary: 10_000_000, FixedAllowance: 500_000, NonFixedAllowance: 300_000,

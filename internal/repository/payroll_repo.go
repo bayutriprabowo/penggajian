@@ -12,14 +12,17 @@ type payrollRepo struct {
 	db *gorm.DB
 }
 
+// NewPayrollRepository membuat implementasi PayrollRepository berbasis GORM.
 func NewPayrollRepository(db *gorm.DB) PayrollRepository {
 	return &payrollRepo{db: db}
 }
 
+// Create menyimpan slip gaji baru.
 func (r *payrollRepo) Create(ctx context.Context, p *model.Payroll) error {
 	return r.db.WithContext(ctx).Create(p).Error
 }
 
+// FindByID mencari slip gaji berdasarkan ID (termasuk karyawan).
 func (r *payrollRepo) FindByID(ctx context.Context, id uint) (*model.Payroll, error) {
 	var p model.Payroll
 	if err := r.db.WithContext(ctx).Preload("Employee").First(&p, id).Error; err != nil {
@@ -28,6 +31,7 @@ func (r *payrollRepo) FindByID(ctx context.Context, id uint) (*model.Payroll, er
 	return &p, nil
 }
 
+// FindByEmployeePeriod mencari slip gaji karyawan pada periode tertentu.
 func (r *payrollRepo) FindByEmployeePeriod(ctx context.Context, employeeID uint, period string) (*model.Payroll, error) {
 	var p model.Payroll
 	err := r.db.WithContext(ctx).Where("employee_id = ? AND period = ?", employeeID, period).First(&p).Error
@@ -37,12 +41,14 @@ func (r *payrollRepo) FindByEmployeePeriod(ctx context.Context, employeeID uint,
 	return &p, nil
 }
 
+// ListByEmployee menampilkan riwayat slip gaji karyawan (termasuk data karyawan).
 func (r *payrollRepo) ListByEmployee(ctx context.Context, employeeID uint) ([]model.Payroll, error) {
 	var list []model.Payroll
 	err := r.db.WithContext(ctx).Preload("Employee").Where("employee_id = ?", employeeID).Order("period DESC").Find(&list).Error
 	return list, err
 }
 
+// ListByPeriod menampilkan slip gaji satu periode dengan paginasi.
 func (r *payrollRepo) ListByPeriod(ctx context.Context, period string, page, limit int) ([]model.Payroll, int64, error) {
 	var list []model.Payroll
 	q := r.db.WithContext(ctx).Model(&model.Payroll{}).Where("period = ?", period)
@@ -56,6 +62,7 @@ func (r *payrollRepo) ListByPeriod(ctx context.Context, period string, page, lim
 	return list, total, nil
 }
 
+// UpdateStatus mengubah status slip gaji.
 func (r *payrollRepo) UpdateStatus(ctx context.Context, id uint, status string) error {
 	res := r.db.WithContext(ctx).Model(&model.Payroll{}).Where("id = ?", id).Update("status", status)
 	if res.Error != nil {
@@ -67,6 +74,7 @@ func (r *payrollRepo) UpdateStatus(ctx context.Context, id uint, status string) 
 	return nil
 }
 
+// SumPPh21ByEmployeeYear menjumlahkan PPh 21 yang sudah dipotong selama setahun.
 func (r *payrollRepo) SumPPh21ByEmployeeYear(ctx context.Context, employeeID uint, year int) (float64, error) {
 	var sum float64
 	err := r.db.WithContext(ctx).Model(&model.Payroll{}).

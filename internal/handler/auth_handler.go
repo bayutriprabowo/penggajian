@@ -12,6 +12,7 @@ type AuthHandler struct {
 	auth service.AuthService
 }
 
+// NewAuthHandler membuat handler untuk autentikasi (register/login).
 func NewAuthHandler(auth service.AuthService) *AuthHandler {
 	return &AuthHandler{auth: auth}
 }
@@ -37,6 +38,7 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 	writeCreated(w, "registrasi berhasil", user)
 }
 
+// Login memverifikasi kredensial dan mengembalikan token JWT.
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var req dto.LoginRequest
 	if err := decodeJSON(w, r, &req); err != nil {
@@ -55,10 +57,12 @@ type UserHandler struct {
 	auth service.AuthService
 }
 
+// NewUserHandler membuat handler untuk data user.
 func NewUserHandler(auth service.AuthService) *UserHandler {
 	return &UserHandler{auth: auth}
 }
 
+// Me mengembalikan profil user yang sedang login.
 func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
 	user := middleware.UserFromContext(r.Context())
 	if user == nil {
@@ -79,6 +83,7 @@ func (h *UserHandler) Me(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+// List mengembalikan daftar user (paginasi).
 func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 	page := queryInt(r, "page", 1)
 	limit := queryInt(r, "limit", 10)
