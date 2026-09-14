@@ -23,6 +23,7 @@ type Config struct {
 	DefaultAdminPass string
 	SeedDemo         bool
 	DemoUserPass     string
+	SeedOnly         bool
 }
 
 // Load membaca seluruh konfigurasi aplikasi dari environment variable.
@@ -45,6 +46,7 @@ func Load() *Config {
 		DefaultAdminPass: getEnv("DEFAULT_ADMIN_PASS", "admin123"),
 		SeedDemo:         getEnvBool("SEED_DEMO", false),
 		DemoUserPass:     getEnv("DEMO_USER_PASS", "rahasia123"),
+		SeedOnly:         getEnvBool("SEED_ONLY", false),
 	}
 }
 

@@ -69,6 +69,15 @@ func main() {
 		}
 	}
 
+	// mode seed saja: selesai setelah migrasi + seeder, tanpa menjalankan server
+	if cfg.SeedOnly {
+		if err := sqlDB.Close(); err != nil {
+			log.Printf("gagal menutup koneksi database: %v", err)
+		}
+		log.Println("seeding selesai, server tidak dijalankan (SEED_ONLY=true)")
+		return
+	}
+
 	handlers := &router.Handlers{
 		Auth:     handler.NewAuthHandler(svc.Auth),
 		User:     handler.NewUserHandler(svc.Auth),

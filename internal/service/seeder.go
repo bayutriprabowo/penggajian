@@ -36,6 +36,9 @@ var roleDescriptions = map[string]string{
 	"employee": "Melihat slip gaji milik sendiri",
 }
 
+// roleOrder memastikan urutan pembuatan role selalu konsisten (anti map acak).
+var roleOrder = []string{"admin", "hr", "finance", "employee"}
+
 // SeedRBAC membuat permission, role, dan user admin default (idempotent).
 func SeedRBAC(ctx context.Context, roles repository.RoleRepository, users repository.UserRepository, cfg *config.Config) error {
 	existing, err := roles.FindPermissionsByName(ctx, allPermissions)
@@ -64,7 +67,8 @@ func SeedRBAC(ctx context.Context, roles repository.RoleRepository, users reposi
 		permMap[p.Name] = p
 	}
 
-	for roleName, permNames := range rolePermissions {
+	for _, roleName := range roleOrder {
+		permNames := rolePermissions[roleName]
 		role, err := roles.FindRoleByName(ctx, roleName)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			role = &model.Role{Name: roleName, Description: roleDescriptions[roleName]}

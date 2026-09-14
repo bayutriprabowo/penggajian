@@ -73,6 +73,9 @@ Status: `[x]` selesai, `[ ]` belum
 - [x] `SeedDemo` idempotent: 4 karyawan + user, lembur, payroll bulan lalu, user finance
 - [x] Dikontrol env `SEED_DEMO` (default false) + `DEMO_USER_PASS`
 - [x] Test idempotency dengan fake repository
+- [x] Mode `SEED_ONLY` + target `make seed` (migrasi + seeder lalu keluar)
+- [x] Urutan pembuatan role deterministik (anti map acak)
+- [x] Data terseed & terverifikasi di PostgreSQL lokal
 
 ## Kriteria Selesai
 

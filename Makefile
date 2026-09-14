@@ -1,4 +1,4 @@
-.PHONY: run build test vet tidy db-create db-drop
+.PHONY: run build test vet tidy seed db-create db-drop
 
 run:
 	go run ./cmd/server
@@ -14,6 +14,10 @@ vet:
 
 tidy:
 	go mod tidy
+
+# migrasi + seed RBAC & data demo ke PostgreSQL, lalu berhenti
+seed:
+	SEED_DEMO=true SEED_ONLY=true go run ./cmd/server
 
 # membuat role & database PostgreSQL lokal
 # (dijalankan dengan user postgres / superuser)
